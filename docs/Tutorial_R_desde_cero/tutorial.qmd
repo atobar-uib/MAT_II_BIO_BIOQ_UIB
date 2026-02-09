@@ -13,7 +13,7 @@ Rstudio es un entorno de desarrollo interactivo (IDE) de R, un programa utilizad
 
 ## Instalación de R
 
-1. Visita la página [https://cran.rstudio.com/]()
+1. Visita la página [https://cran.rstudio.com/](https://cran.rstudio.com/)
 
 ![Pulsa sobre el texto <span style="color: blue;">azul</span> correspondiente a tu sistema operativo.](r_1.png)
 
@@ -31,7 +31,7 @@ Rstudio es un entorno de desarrollo interactivo (IDE) de R, un programa utilizad
 
 ## Instalación de Rstudio
 
-1. Visita la página [https://posit.co/download/rstudio-desktop/](). En función de vuestro sistema operativo os saldrá una de las siguientes opciones
+1. Visita la página [https://posit.co/download/rstudio-desktop/](https://posit.co/download/rstudio-desktop/). En función de vuestro sistema operativo os saldrá una de las siguientes opciones
 
 ![Pulsa sobre <span style="color: blue;">DOWNLOAD RSTUDIO DESKTOP FOR...</span>](rstudio_1.png)
 
