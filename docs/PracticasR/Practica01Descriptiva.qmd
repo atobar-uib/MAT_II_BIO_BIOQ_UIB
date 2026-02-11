@@ -1,0 +1,276 @@
+---
+title: "Conceptos básicos"
+author: "NA Cruz"
+format: html
+editor: visual
+embed-resources: true
+---
+
+# PRÁCTICA 1 — Estadística Descriptiva
+
+## Contexto del estudio
+
+La calidad del agua es un elemento clave para la conservación de los ecosistemas acuáticos y para la gestión ambiental en Mallorca. La isla presenta una gran diversidad de ambientes hídricos:
+
+-   Torrentes de la Serra de Tramuntana\
+-   Zonas agrícolas del Pla\
+-   Áreas urbanas como Palma\
+-   Zonas húmedas como s’Albufera\
+-   Áreas costeras
+
+En este estudio, el Consell de Mallorca ha realizado una campaña de muestreo con el objetivo de evaluar el estado ecológico del agua en diferentes puntos de la isla.
+
+Se han recogido **500 muestras de agua**, cada una correspondiente a una medición puntual realizada en un lugar y momento determinado.
+
+En cada muestra se han medido los siguientes parámetros:
+
+-   pH\
+-   Temperatura (°C)\
+-   Turbidez (NTU)\
+-   Oxígeno disuelto (mg/L)\
+-   Conductividad (µS/cm)
+
+Además, se han clasificado las muestras según:
+
+-   Tipo de zona\
+-   Uso del suelo\
+-   Temporada\
+-   Estado ecológico\
+-   Riesgo de eutrofización\
+-   Presión antrópica
+
+# Objetivos de la práctica
+
+1.  Comprender la diferencia entre **población y muestra**
+2.  Analizar cómo se realiza un **proceso de muestreo**
+3.  Identificar y clasificar los **tipos de variables**
+4.  Interpretar los datos desde un punto de vista ambiental
+
+------------------------------------------------------------------------
+
+# 1. Población y muestra
+
+## A. Definición conceptual
+
+a)  ¿Cuál sería la **población estadística** en este estudio?
+
+b)  ¿Qué representa la **muestra** utilizada?
+
+c)  ¿Son lo mismo “500 muestras de agua” que “500 lugares de Mallorca”? Justifica.
+
+------------------------------------------------------------------------
+
+## B. Diseño de muestreo
+
+Supongamos que las muestras se tomaron:
+
+-   En 5 tipos de zona\
+-   Durante las 4 estaciones del año\
+-   Con puntos seleccionados de forma aleatoria dentro de cada zona
+
+a)  ¿Qué tipo de muestreo se ha realizado?
+
+    -   Aleatorio simple\
+    -   Estratificado\
+    -   Sistemático\
+    -   Por conveniencia
+
+b)  ¿Por qué es importante que el muestreo esté bien distribuido espacial y temporalmente?
+
+c)  ¿Qué sesgos podrían aparecer si solo se muestreara en verano?
+
+------------------------------------------------------------------------
+
+# 2. Tipos de variables
+
+## Clasificación de variables
+
+Completa la siguiente tabla:
+
+| Variable | Tipo (cualitativa / cuantitativa) | Subtipo (Ordinal/nominal/discreta/Continua) | Justificación |
+|--------------|-------------------------------|--------------|--------------|
+| pH |  |  |  |
+| Temperatura |  |  |  |
+| Turbidez |  |  |  |
+| Oxígeno disuelto |  |  |  |
+| Conductividad |  |  |  |
+| Tipo de zona |  |  |  |
+| Uso del suelo |  |  |  |
+| Estado ecológico |  |  |  |
+| Riesgo eutrofización |  |  |  |
+| Presión antrópica |  |  |  |
+
+# 3. Gráficas y tablas
+
+```{r}
+library(tidyverse)
+Water <- read_csv("WaterQualityTesting.csv")
+
+```
+
+### Tabla de frecuencias
+
+Vamos a ver la frecuencia de **Tipo_de_Zona**:
+
+```{r}
+
+freq_tipo <- water %>%
+  count(Tipo_de_Zona) %>%
+  arrange(desc(n))
+
+freq_tipo
+```
+
+### Diagrama de barras
+
+Visualizamos la cantidad de muestras por **Uso_del_Suelo** con colores personalizados:
+
+```{r}
+ggplot(water, aes(x = Uso_del_Suelo, fill = Uso_del_Suelo)) +
+  geom_bar() +
+  labs(
+    title = "Número de muestras por uso del suelo",
+    x = "Uso del suelo",
+    y = "Número de muestras"
+  )
+```
+
+```{r}
+ggplot(water, aes(x = Uso_del_Suelo, fill = Uso_del_Suelo)) +
+  geom_bar() +
+  scale_fill_brewer(palette = "Set2") +
+  labs(
+    title = "Número de muestras por uso del suelo",
+    x = "Uso del suelo",
+    y = "Número de muestras"
+  ) +
+  theme_minimal()
+```
+
+Con dos variables
+
+```{r}
+tabla_cont <- table(water$Tipo_de_Zona, water$Estado_Ecológico)
+tabla_cont
+```
+
+```{r}
+ggplot(water, aes(x = Tipo_de_Zona, fill = Estado_Ecológico)) +
+  geom_bar(position = "fill") +
+  labs(title = "Proporción de Estado Ecológico por Tipo de Zona",
+       x = "Tipo de zona",
+       y = "Proporción") +
+  theme_minimal()
+```
+
+```{r}
+ggplot(water, aes(x = Tipo_de_Zona, fill = Estado_Ecológico)) +
+  geom_bar(position = "dodge") +
+  labs(title = "Conteo de Estado Ecológico por Tipo de Zona",
+       x = "Tipo de zona",
+       y = "Conteo") +
+  theme_minimal()
+```
+
+```{r}
+ggplot(water, aes(x = Tipo_de_Zona, fill = Estado_Ecológico)) +
+  geom_bar(position = "stack") +
+  labs(title = "Conteo de Estado Ecológico por Tipo de Zona",
+       x = "Tipo de zona",
+       y = "Conteo") +
+  theme_minimal()
+```
+
+### Gráfico de sectores circulares (Pie chart)
+
+Proporción de muestras por **Estado_Ecológico**:
+
+```{r}
+estado_counts <- water %>%
+  count(Estado_Ecológico) %>%
+  mutate(prop = n / sum(n),
+         label = paste0(Estado_Ecológico, " (", n, ")"))
+
+ggplot(estado_counts, aes(x = "", y = prop, fill = Estado_Ecológico)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y")
+  labs(
+    title = "Proporción de muestras por Estado Ecológico"
+  ) 
+
+```
+
+```{r}
+
+ggplot(estado_counts, aes(x = "", y = prop, fill = Estado_Ecológico)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y") +
+  scale_fill_brewer(palette = "Pastel2") +
+  labs(
+    title = "Proporción de muestras por Estado Ecológico"
+  ) +
+  theme_void()
+
+```
+
+### Boxplot
+
+Distribución de **Dissolved Oxygen (mg/L)** por **Tipo_de_Zona**:
+
+```{r}
+ggplot(water, aes(x = Tipo_de_Zona, y = `Dissolved Oxygen (mg/L)`)) +
+  geom_boxplot() 
+```
+
+```{r}
+
+ggplot(water, aes(x = Tipo_de_Zona, y = `Dissolved Oxygen (mg/L)`, fill = Tipo_de_Zona)) +
+  geom_boxplot() +
+  scale_fill_brewer(palette = "Pastel1") +
+  labs(
+    title = "Distribución de oxígeno disuelto por tipo de zona",
+    x = "Tipo de zona",
+    y = "Oxígeno disuelto (mg/L)"
+  ) +
+  theme_minimal()
+
+```
+
+### Gráfico de dispersión
+
+Relación entre **Turbidez (NTU)** y **Dissolved Oxygen (mg/L)**, coloreado por **Riesgo_Eutrofización**:
+
+```{r}
+ggplot(water, aes(x = `Turbidity (NTU)`, y = `Dissolved Oxygen (mg/L)`)) +
+  geom_point()
+```
+
+```{r}
+ggplot(water, aes(x = `Turbidity (NTU)`, y = `Dissolved Oxygen (mg/L)`, color = Riesgo_Eutrofización)) +
+  geom_point(alpha = 0.7, size = 2) +
+  scale_color_brewer(palette = "Dark2") +
+  labs(
+    title = "Relación entre turbidez y oxígeno disuelto",
+    x = "Turbidez (NTU)",
+    y = "Oxígeno disuelto (mg/L)"
+  ) +
+  theme_minimal()
+
+```
+
+### Histogramas de variables continuas
+
+```{r}
+
+ggplot(water, aes(x = `Dissolved Oxygen (mg/L)`)) +
+  geom_histogram()
+```
+
+```{r}
+ggplot(Water, aes(x =`Dissolved Oxygen (mg/L)`)) +
+      geom_histogram(binwidth = 0.5, fill = "steelblue", 
+                     color = "black", alpha = 0.7) +
+      labs(title = paste("Histograma de", var),
+           x = var,
+           y = "Frecuencia") 
+```
