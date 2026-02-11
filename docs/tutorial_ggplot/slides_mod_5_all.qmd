@@ -1,0 +1,880 @@
+---
+title: "Módulo 5"
+author: "Adrián Tobar Nicolau"
+format: 
+  html:
+    embed-resources: true
+    toc: true
+#  beamer:
+#    echo : true
+#    slide-level: 3
+#execute:
+#  cache: true 
+editor: source
+---
+
+![](header.svg){width=100%}
+
+###  {.plain}   
+
+```{r}
+#| echo: false
+#| out-width: "100%"
+#knitr::include_graphics("portada.jpg")
+```
+
+
+# Guía para ggplot2
+
+El paquete ggplot2 permite la creación de figuras dando un control total sobre 
+sus propiedades. En esta sesión vamos a entrar en como crear, colorear, escalar
+y guardar una figura de ggplot2 a nuestro gusto.
+
+
+```{r}
+#| include: false
+#knitr::knit_exit()
+```
+
+
+## Antes de empezar
+
+
+
+Cargamos los paquetes que usaremos.
+
+```{r,message=FALSE, warning=FALSE}
+library(tidyverse)
+library(MASS)
+```
+
+
+```{r,message=FALSE, warning=FALSE}
+#| echo: false
+#esta opción es para facilitar la lectura de los ejes 
+theme_set(theme_grey(base_size = 20))
+```
+
+---
+
+Preparamos los datos de ejemplo.
+
+```{r}
+data("birthwt")
+bwt <- birthwt |>
+  mutate(
+    smoke = factor(smoke, labels = c("No fumadora",
+                                     "Fumadora")),
+    ht    = factor(ht, labels = c("No HTA",
+                                  "HTA")),
+    ui    = factor(ui, labels = c("No irritabilidad",
+                                  "Irritabilidad")),
+    race  = factor(race, labels = c("Blanca",
+                                    "Negra",
+                                    "Otra"))
+  )
+#fijamos peso a kg
+bwt$lwt= 0.45359237*bwt$lwt
+```
+
+
+## Datos, estética, y geometría
+
+
+Toda figura de ``ggplot2`` tiene datos, estética y geometría.
+
+Veamos un ejemplo básico.
+
+
+---
+
+
+```{r}
+#| fig-align: 'center'
+ggplot(bwt, aes(x = lwt, y = bwt)) + geom_point()
+```
+
+---
+
+
+
+Este gráfico de puntos está definido por
+
+1. Datos: bwt.
+2. Aes (estética): en el eje $x$ el peso de la madre en su último período menstrual
+y en el eje $y$ el peso del neonato en gramos.
+3. Geometría: gráfico de puntos.
+
+Habitualmente tendremos dos datos, uno para el eje $x$ y otro para el eje $y$. Por comodidad podemos obviar la notación $x=,y=$ de la siguiente manera
+
+```{r,eval=FALSE}
+ggplot(bwt, aes(lwt,bwt)) + geom_point()
+```
+
+
+### Color
+
+El paquete ``ggplot2`` permite colorear la figura en función de datos
+
+```{r}
+#| fig-align: 'center'
+ggplot(bwt, aes(lwt,bwt, color=smoke)) + geom_point()
+```
+
+---
+
+Además, detecta si usar un gradiente o categorías.
+
+```{r}
+#| fig-align: 'center'
+ggplot(bwt, aes(lwt,bwt, color=age)) + geom_point()
+```
+
+
+### Las paletas básicas de ``ggplot2``
+
+### Ejemplo categórico por defecto
+
+```{r}
+#| fig-align: 'center'
+ggplot(bwt, aes(lwt,bwt, color=factor(ftv))) + 
+  geom_point() + scale_colour_hue()
+```
+**OJO:** para que ``ggplot2`` entienda una categoría como discreta tiene que estar como factor ypara que sea continua no.
+
+### Ejemplo grises por defecto
+
+```{r}
+#| fig-align: 'center'
+ggplot(bwt, aes(lwt,bwt, color=factor(ftv))) + 
+  geom_point() + scale_colour_grey()
+```
+
+### Paletas ColorBrewer
+
+Para variables categóricas.
+
+```{r}
+#| fig-align: 'center'
+
+RColorBrewer::display.brewer.all(type = "qual")
+```
+### Ejemplo categórica
+
+```{r}
+#| fig-align: 'center'
+ggplot(bwt, aes(lwt,bwt, color=factor(ftv))) + 
+  geom_point() + scale_colour_brewer(palette = "Dark2")
+```
+
+### Paletas ColorBrewer
+
+Para datos secuenciales.
+
+```{r}
+#| fig-align: 'center'
+RColorBrewer::display.brewer.all(type = "seq")
+```
+### Ejemplo con YlorBr
+
+```{r}
+#| fig-align: 'center'
+ggplot(bwt, aes(lwt,bwt, color=factor(ftv))) + 
+  geom_point()+scale_colour_brewer(palette = "YlOrBr")
+```
+
+### Paletas ColorBrewer
+
+3. Para datos divergentes (cuando los datos tienen un punto medio significativo).
+
+```{r}
+#| fig-align: 'center'
+RColorBrewer::display.brewer.all(type = "div")
+```
+### Ejemplo divergente
+
+
+```{r}
+#| fig-align: 'center'
+ggplot(bwt, aes(lwt,bwt, color=factor(ftv))) + 
+  geom_point()+scale_colour_brewer(palette = "BrBG")
+```
+
+### Paletas continuas
+
+En el caso de trabajar con datos continuos hay que usar la instrucción ``scale_colour_fermenter``
+
+```{r}
+#| fig-align: 'center'
+ggplot(bwt, aes(lwt,bwt, color=age)) + geom_point()+
+  scale_colour_fermenter(palette = "RdBu")
+```
+
+### Viridis
+
+Del paquete Viridis: A (magma), B (inferno), C (plasma), D (viridis), E (cividis), F (rocket), G (mako).
+
+El paquete viridis organiza las paletas entre discretas y continuas en función de si se usa la instrucción ``scale_colour_viridis_d`` o ``scale_colour_viridis_c`` respectivamente.
+
+### Ejemplo categórico/discreto
+
+```{r}
+#| fig-align: 'center'
+ggplot(bwt, aes(lwt,bwt, color=factor(ftv))) + 
+  geom_point()+
+  scale_colour_viridis_d(option = "A")
+```
+
+### Ejemplo continuo
+
+```{r}
+#| fig-align: 'center'
+ggplot(bwt, aes(lwt,bwt, color=age)) + geom_point()+
+  scale_colour_viridis_c(option = "A")
+```
+
+### A mano
+
+```{r}
+#| fig-align: 'center'
+ggplot(bwt, aes(lwt,bwt, color=age)) + geom_point()+
+  scale_color_gradient(low = "grey80", high = "darkblue")
+```
+
+### A mano
+
+```{r}
+#| fig-align: 'center'
+ggplot(bwt, aes(lwt,bwt, color=race)) + geom_point()+
+  scale_color_manual(values= c(Negra = "orange", 
+  Blanca = "yellow", Otra = "gray"))
+```
+
+### Color fijo
+
+**OJO:** si queremos colorear en función de un dato, lo indicaremos dentro de aes, en cambio si queremos colorear todo igual lo haremos fuera de aes. Esto será asi para cualquier parámetro que usemos. 
+
+### Ejemplo uso incorrecto color fijo
+
+```{r}
+#| fig-align: 'center'
+ggplot(bwt, aes(lwt,bwt)) + 
+  geom_point(aes(color = "blue"))
+```
+
+### Ejemplo uso correcto color fijo
+
+```{r}
+#| fig-align: 'center'
+ggplot(bwt, aes(lwt,bwt)) + geom_point(color = "blue")
+```
+
+### Tamaños
+
+También podemos ajustar el tamaño de los puntos en función de una variable o de forma global.
+
+### Ejemplo tamaño dependiente
+```{r}
+#| fig-align: 'center'
+ggplot(bwt, aes(lwt,bwt))+geom_point(aes(size = age))
+```
+
+### Ejemplo tamaño fijo
+
+```{r}
+#| fig-align: 'center'
+ggplot(bwt, aes(lwt,bwt)) + geom_point(size = 3)
+```
+
+
+### Formas
+
+De la misma manera podemos asignar formas en función de una categoría o fijar una forma a todo el dibujo
+
+### Forma dependiente
+
+```{r}
+#| fig-align: 'center'
+ggplot(bwt, aes(lwt,bwt)) + 
+  geom_point(aes(shape = smoke))
+```
+
+### Forma fija
+
+```{r}
+#| fig-align: 'center'
+ggplot(bwt, aes(lwt,bwt)) + geom_point(shape = 17)
+```
+
+### ``ggpubr``
+
+```{r,warning=FALSE,message=FALSE, echo=FALSE}
+#| fig-align: 'center'
+library(ggpubr)
+show_point_shapes() + labs(title = NULL)
+```
+
+En el caso de usar más de 25 formas, ``ggplot2`` usa carácteres ascii. Llegados a ese punto mejor dividir el dibujo en varios.
+
+### Bordes y ``fill``
+
+Podemos editar el borde de manera diferente al relleno usando ``fill``, exclusivo de las figuras 21 hasta 25.
+
+```{r}
+#| fig-align: 'center'
+ggplot(bwt, aes(lwt,bwt)) + 
+  geom_point(aes(fill = smoke),color = "yellow",
+             shape = 21,size = 4)
+```
+
+### Bordes y ``stroke``
+
+También podemos alterar el grosor del borde usando ``stroke``
+
+```{r}
+#| fig-align: 'center'
+ggplot(bwt, aes(lwt,bwt)) + 
+  geom_point(aes(color = smoke),fill = "black",
+             shape = 21,size = 4,stroke = 3)
+```
+
+### Alpha
+
+Cuando hay muchas figuras reducir la opacidad mejora la visualización.
+
+```{r}
+#| fig-align: 'center'
+ggplot(bwt, aes(lwt,bwt)) + 
+  geom_point(alpha = 0.2, size = 2.5)
+```
+
+### Facetting
+
+Para hacer un dibujo por categoría, basta añadir la instrucción ``facet_wrap`` si queremos superponerlos, hacemos group.
+
+```{r}
+#| fig-align: 'center'
+ggplot(bwt, aes(lwt,bwt)) + 
+  geom_point(aes(color = race))+ facet_wrap(~race) 
+```
+
+**OJO:** hay que añadir el \~ antes del nombre de la categoría.
+
+
+
+### Leyenda y ejes
+
+```{r}
+#| fig-align: 'center'
+ggplot(bwt, aes(lwt,bwt)) + geom_point(aes(color=ui))+
+  labs(y= "Peso neonato (g)",
+       x="Peso madre (Kg)",
+       title = "Relación peso madre vs peso neonato",
+       color = "Irritabilidad uterina")
+  
+```
+
+Para ajustar el nombre de la leyenda ponemos el nombre del parámetro que se está usando para que aparezca.
+
+### Quitar leyenda
+
+También podemos eliminar la leyenda completamente.
+
+```{r}
+#| fig-align: 'center'
+ggplot(bwt, aes(lwt,bwt)) + 
+  geom_point(aes(color=ui),show.legend = FALSE)+
+  labs(y= "Peso neonato (g)",
+       x="Peso madre (Kg)",
+       title = "Relación peso madre vs peso neonato")
+  
+```
+
+
+### Escalas
+
+Es posible manipular manualmente el tamaño de los ejes.
+
+```{r, warning=TRUE}
+#| fig-align: 'center'
+ggplot(bwt,aes(age,lwt))+
+  geom_point()+
+  xlim(0,100)+
+  ylim(0,100)
+```
+En este caso R nos da el aviso de hay puntos que no están encuadrados.
+
+### Elegir solo uno de los extremos
+
+Podemos usar ``NA`` para que R decidá por nosotros el valor.
+
+```{r}
+#| fig-align: 'center'
+ggplot(bwt,aes(age,lwt))+
+  geom_point()+
+  xlim(NA,100)+
+  ylim(30,NA)
+```
+
+
+### Temas
+
+Podemos elegir entre varios temas.
+
+```{r,echo=FALSE}
+library(patchwork)
+t1 <- ggplot(bwt,aes(lwt,bwt))+
+  geom_point()+
+  theme_gray()+ 
+  labs(x= NULL,y=NULL, title ="+ theme_gray()")
+t2 <- ggplot(bwt,aes(lwt,bwt))+
+  geom_point()+
+  theme_bw()+ 
+  labs(x= NULL,y=NULL, title ="+ theme_bw()")
+t3 <- ggplot(bwt,aes(lwt,bwt))+
+  geom_point()+
+  theme_linedraw()+ 
+  labs(x= NULL,y=NULL, title ="+ theme_linedraw()")
+t4 <- ggplot(bwt,aes(lwt,bwt))+
+  geom_point()+
+  theme_light()+ 
+  labs(x= NULL,y=NULL, title ="+ theme_light()")
+t5 <- ggplot(bwt,aes(lwt,bwt))+
+  geom_point()+
+  theme_dark()+ 
+  labs(x= NULL,y=NULL, title ="+ theme_dark()")
+t6 <- ggplot(bwt,aes(lwt,bwt))+
+  geom_point()+
+  theme_minimal()+ 
+  labs(x= NULL,y=NULL, title ="+theme_minimal()")
+t7 <- ggplot(bwt,aes(lwt,bwt))+
+  geom_point()+
+  theme_classic()+ #como plot
+  labs(x= NULL,y=NULL, title ="+ theme_classic()")
+t8 <- ggplot(bwt,aes(lwt,bwt))+
+  geom_point()+
+  theme_void()+ 
+  labs(x= NULL,y=NULL, title ="+ theme_void()")
+t9 <- ggplot(bwt,aes(lwt,bwt))+
+  geom_point()+
+  theme_test()+ 
+  labs(x= NULL,y=NULL, title ="+ theme_test()")
+
+(t1 | t2 | t3) /
+  (t4 | t5 | t6) /
+  (t7 | t8 | t9 )
+```
+
+### Creación de un tema personalizado
+
+```{r, message=FALSE, echo=FALSE}
+library(showtext)
+
+font_add(family = "Times New Roman",
+         regular = "C:/Windows/Fonts/times.ttf",
+         bold    = "C:/Windows/Fonts/timesbd.ttf",
+         italic  = "C:/Windows/Fonts/timesi.ttf",
+         bolditalic = "C:/Windows/Fonts/timesbi.ttf")
+
+font_add(family = "comicsans",
+         regular = "C:/Windows/Fonts/comic.ttf",
+         bold = "C:/Windows/Fonts/comicbd.ttf",
+         italic = "C:/Windows/Fonts/comici.ttf",
+         bolditalic = "C:/Windows/Fonts/comicz.ttf")
+
+showtext_auto()  # activa el renderizado de showtext
+```
+
+```{r}
+##| cache-rebuild: true
+theme_everything <- theme(
+  line = element_line(colour = "gray20", 
+                      linewidth = 0.5, linetype = 1, 
+                      lineend = "butt"),
+  rect = element_rect(fill = "white", colour = NA, 
+                      linewidth = 0.5, linetype = 1),
+  text = element_text(family = "comicsans",face = "plain", 
+                      colour = "gray10", size = 32,
+                      lineheight = 0.9, hjust = 0, 
+                      vjust = 0, margin = margin(), 
+                      angle = 0),
+  axis.title = element_text(face = "bold", size = 20),
+  axis.title.x = element_text(margin = margin(t = 8)),
+  axis.title.y = element_text(margin = margin(r = 8), 
+                              angle = 45), 
+  axis.text = element_text(colour = "red"))
+```
+
+### Ejemplo de uso del tema personalizado
+
+```{r}
+#| fig-align: 'center'
+ggplot(bwt,aes(lwt,bwt))+
+  geom_point(aes(color = smoke))+
+  theme_everything +
+  labs(title = "Título", subtitle = "Subtítulo")
+```
+
+### Añadir fuentes
+
+Con el paquete ``showtext`` podemos añadir fuentes de nuestro sistema (solo para windows).
+
+```{r, message=FALSE, eval=FALSE}
+library(showtext)
+
+font_add(family = "Times New Roman",
+         regular = "C:/Windows/Fonts/times.ttf",
+         bold    = "C:/Windows/Fonts/timesbd.ttf",
+         italic  = "C:/Windows/Fonts/timesi.ttf",
+         bolditalic = "C:/Windows/Fonts/timesbi.ttf")
+
+font_add(family = "comicsans",
+         regular = "C:/Windows/Fonts/comic.ttf",
+         bold = "C:/Windows/Fonts/comicbd.ttf",
+         italic = "C:/Windows/Fonts/comici.ttf",
+         bolditalic = "C:/Windows/Fonts/comicz.ttf")
+
+showtext_auto()  # activa el renderizado de showtext
+```
+
+### Ejemplo fuente 
+
+```{r}
+#| fig-align: 'center'
+ggplot(bwt,aes(lwt,bwt))+
+  geom_point(aes(color = smoke))+
+  labs(title = "Ejemplo con Comic Sans") +
+  theme_minimal(base_family = "Times New Roman")
+  
+
+```
+
+
+## Geometría
+
+Ahora que ya conocemos las opciones de personalización, estudiamos las opciones de geometría disponibles. 
+
+La mejor manera de acceder a la lista de geometrías es usando la "chuleta" de ggplot2 [https://posit.co/wp-content/uploads/2022/10/data-visualization-1.pdf]
+
+Cuándo usar cada geometría depende del tipo de datos y de qué se quiera explicar. Vamos a ver algunas de las más típicas ¡Se pueden combinar!
+
+### Interpolación de valores
+
+Datos temporales suelen representarse con una poligonal que interpola los puntos.
+
+Para este ejemplo usamos datos temporales (mdeaths,fdeaths) contenidos en R base.
+
+
+```{r}
+df <- data.frame(
+  date   = seq(as.Date("1974-01-01"), by = "month", 
+               length.out = length(mdeaths)),
+  Male   = as.numeric(mdeaths),
+  Female = as.numeric(fdeaths)
+) |>
+  pivot_longer(cols = c(Male, Female), 
+               names_to = "sex", values_to = "deaths")
+
+```
+
+### Linewidth
+
+El grosor se puede ajustar con linewidth. 
+
+```{r}
+#| fig-align: 'center'
+ggplot(df, aes(x = date, y = deaths, color = sex)) +
+  geom_line(linewidth = 1) +
+  labs(
+    title = "nº de muertes mensuales por 
+    Bronquitis, Enfisema y Asma (Reino Unido, 1974–1979)",
+    x = "Año", y = "Muertes", color = "Sexo"
+  ) +
+  theme_minimal()
+```
+
+
+**OJO:** Observad como, al añadir un color, nos ha separado dos datos en dos curvas diferentes.
+
+### Curva de los datos
+
+Para ajustar los datos a una curva de regresión.
+
+```{r}
+#| fig-align: 'center'
+ggplot(bwt, aes(lwt,bwt))+
+  geom_point()+
+  geom_smooth()
+```
+
+### Regresión lineal
+
+```{r}
+#| fig-align: 'center'
+ggplot(bwt, aes(lwt,bwt))+
+  geom_point()+
+  geom_smooth(method = "lm")
+```
+
+### Gráfico de barras
+
+Para mostrar la distribución de variables categoricas.
+
+```{r}
+#| fig-align: 'center'
+ggplot(bwt, aes(ftv))+
+  geom_bar()
+```
+
+### ``geom_col()``
+
+Si queremos reflejar una magnitud respecto de otra por categoría hay que usar ``geom_col``.
+
+
+```{r}
+#| fig-align: 'center'
+ggplot(bwt, aes(race,low))+
+  geom_col()+
+  labs(title = "Nº de casos de bajo peso al nacer")
+```
+
+### Recuerda lo aprendido
+
+Recordad que podemos aplicar todas las técnicas anteriores.
+
+```{r}
+#| fig-align: 'center'
+ggplot(bwt, aes(race,low))+ geom_col(aes(fill = factor(smoke)))+
+  labs(title = "Nº de casos de bajo peso al nacer (<2.5Kg)",
+       fill = "Tabaquismo de la madre")
+```
+
+
+### Boxplots y jittered points
+
+Nos pueden aparecer casos de esta forma.
+
+```{r}
+#| fig-align: 'center'
+ggplot(bwt,aes(race,bwt)) + geom_point()
+```
+
+### ``geom_jitter``
+
+Para facilitar la visualización de los datos tenemos varias opciones. La primera es mover ligeramente los puntos con ``geom_jitter`` 
+
+```{r}
+#| fig-align: 'center'
+ggplot(bwt,aes(race,bwt))+
+  geom_jitter(width = 0.1) #width indica lo mucho que se desplazan
+```
+
+### Boxplot y violin plot
+
+Otra alternativa es resumir los datos.
+
+```{r}
+#| fig-align: 'center'
+v1<- ggplot(bwt,aes(race,bwt))+geom_boxplot()
+v2 <- ggplot(bwt,aes(race,bwt))+geom_violin()
+v1|v2
+```
+
+### Histogramas y polígonos de frecuencias
+
+
+Un histograma, o un polígono de frecuencias, nos permite ver la distribución de los datos.
+
+```{r, warning=TRUE}
+#| fig-align: 'center'
+##| fig-asp: 0.618
+#| out-width: "85%"
+ggplot(bwt,aes(bwt))+ geom_histogram(aes(fill=smoke))+geom_freqpoly()+
+  labs(title = "Histograma de pesos de neonatos")
+```
+
+### Ajustar el nº de bind
+
+Por defecto siempre genera 30 columnas. Binwidth que nos indica el tamaño de cada grupo y bins fija el nº total.
+
+```{r}
+#| fig-align: 'center'
+ggplot(bwt,aes(bwt))+ geom_histogram(aes(fill=smoke),binwidth = 400)+geom_freqpoly(binwidth=400)+
+  labs(title = "Histograma de pesos de neonatos")
+```
+
+### Combinando con facet_wrap
+
+```{r}
+#| fig-align: 'center'
+##| fig-asp: 0.618
+#| out-width: "85%"
+ggplot(bwt,aes(bwt))+
+  geom_histogram(aes(fill=smoke),
+    binwidth = 400)+facet_wrap(~race)
+```
+
+
+### Geom_bin2d y geom_hex
+
+Cunado hay muchos datos fácil acabar con problemas de overplotting, esto es hacer el gráfico díficl de leer.
+
+```{r}
+#| fig-align: 'center'
+df <- data.frame(x = rnorm(2000), y = rnorm(2000))
+norm <- ggplot(df, aes(x, y)) + xlab(NULL) + ylab(NULL)
+norm + geom_point()
+```
+
+### Mapa de calor
+
+Podemos representarlo con un grádico de calor
+
+```{r}
+#| fig-align: 'center'
+norm+geom_bin2d()
+```
+
+### Ajustar el nº de bins
+
+Recordad que esto funciona como un geom_bar, hay que indicar bins o binwidth para ajustar a nuestros datos
+
+```{r}
+#| fig-align: 'center'
+norm+geom_bin2d(bins= 20)
+```
+
+### ``geom_hex``
+
+Alternativamente, se puede usar el paquete ``hexbin`` para producir hexágonos.
+
+```{r}
+#| fig-align: 'center'
+library(hexbin)
+d<- norm + geom_hex(bins=20)
+d
+```
+
+
+
+### Y mucho más
+
+Si queremos generar mapas tenemos la función ``geom_sf`` que usa datos sf (Simple Features) para representar objetos geométricos. Podemos entender sf como un data frame de mapas 
+
+```{r, warning=FALSE,message=FALSE}
+library(sf)           #para trabajar con mapas
+library(rnaturalearth)#para descargar mapas
+library(ggthemes)     #más colores
+```
+
+
+### Preparación datos mapa
+
+
+```{r}
+#Datos España
+es_ccaa <- ne_states(country = "Spain", 
+returnclass = "sf")
+# Datos baleares
+balears <- subset(es_ccaa, grepl("Baleares", name, 
+ignore.case = TRUE))
+```
+
+
+### Ejemplo mapa 
+
+```{r}
+#| fig-align: 'center'
+a<- ggplot(balears) +
+  geom_sf(fill="grey90", color = "grey20", 
+          linewidth = 0.4) +coord_sf(expand = 0) +
+  labs(title = "Illes Balears") +
+  theme_void(base_size = 12)
+a
+```
+
+### Creación paleta para España
+
+```{r}
+#| fig-align: 'center'
+# Creación a mano de paleta
+lv <- sort(unique(es_ccaa$ccaa))
+pal <- ggthemes::tableau_color_pal("Tableau 20")(19)
+names(pal) <- lv
+```
+
+### Ejemplo mapa 2
+
+```{r}
+#| fig-align: 'center'
+b<- ggplot(es_ccaa, aes(fill=factor(region)))+
+  geom_sf()+
+  coord_sf(xlim=c(-10,NA),
+           ylim=c(35,NA))+
+  guides(fill = guide_legend(ncol = 2, byrow = TRUE))+
+  labs(title= "Mapa de España",fill= "Comunidad Autónoma")+
+  scale_fill_manual(values = pal) 
+```
+
+```{r, echo=FALSE}
+b
+```
+
+
+
+## Manipulación de archivos y aritmética de ggplot 
+
+### Guardar gráficos
+
+Una vez hemos hecho un gráfico podemos guardarlo de la siguiente manera
+
+```{r, eval=FALSE}
+p <- ggplot(bwt,aes(age,bwt)) + geom_point()
+# Si queremos png o jpeg
+ggsave("plot.png",p,
+       width = 5, 
+       height = 5,
+       units = "cm",
+       dpi = 300)
+# En el caso de pdf, svg (mejor para publicaciones)
+ggsave("plot.pdf",p,
+       width = 5, 
+       height = 5,
+       units = "cm")
+```
+
+Los formatos pdf y svg guardan la estructura interna lo que hace que siempre se vean bien independiente del tamaño, en cambio un png o jpeg es un mapa de bits y la resolución depende de los dpi que indiquemos.
+
+### Aritmética de ggplot
+
+El paquete ``ggplot2`` se ha planteado con una aritmética interna para facilitar hacer muchas gráficas con el mismo conjunto de datos. 
+
+```{r}
+c <- ggplot(bwt,aes(age,bwt)) # guardamos
+
+c <- c + geom_point() #la completamos
+
+```
+
+### ``patchwork``
+
+El paquete ``patchwork``  permite combinar varios gráficos de manera fácil.
+
+```{r}
+#| fig-align: 'center'
+(a | d) / c
+```
+
+
+### Parámetros de ``patchwork``
+
+
+Si queremos agrupar las leyendas en un lado podemos hacerlo con plot_layout.
+
+```{r}
+(a + d +  c) + plot_annotation(title = "Varios gráficos")+ 
+  plot_layout(guides = 'collect')
+```
+
+![](footer.svg){width=100%}
+
