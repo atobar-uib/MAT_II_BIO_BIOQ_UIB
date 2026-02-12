@@ -79,32 +79,11 @@ b)  ¿Por qué es importante que el muestreo esté bien distribuido espacial y t
 
 c)  ¿Qué sesgos podrían aparecer si solo se muestreara en verano?
 
-------------------------------------------------------------------------
-
-# 2. Tipos de variables
-
-## Clasificación de variables
-
-Completa la siguiente tabla:
-
-| Variable | Tipo (cualitativa / cuantitativa) | Subtipo (Ordinal/nominal/discreta/Continua) | Justificación |
-|--------------|-------------------------------|--------------|--------------|
-| pH |  |  |  |
-| Temperatura |  |  |  |
-| Turbidez |  |  |  |
-| Oxígeno disuelto |  |  |  |
-| Conductividad |  |  |  |
-| Tipo de zona |  |  |  |
-| Uso del suelo |  |  |  |
-| Estado ecológico |  |  |  |
-| Riesgo eutrofización |  |  |  |
-| Presión antrópica |  |  |  |
-
 # 3. Gráficas y tablas
 
 ```{r}
 library(tidyverse)
-Water <- read_csv("WaterQualityTesting.csv")
+Water <- read_csv("https://raw.githubusercontent.com/atobar-uib/MAT_II_BIO_BIOQ_UIB/refs/heads/main/Datasets/WaterQualityTesting.csv")
 
 ```
 
@@ -114,7 +93,7 @@ Vamos a ver la frecuencia de **Tipo_de_Zona**:
 
 ```{r}
 
-freq_tipo <- water %>%
+freq_tipo <- Water %>%
   count(Tipo_de_Zona) %>%
   arrange(desc(n))
 
@@ -126,7 +105,7 @@ freq_tipo
 Visualizamos la cantidad de muestras por **Uso_del_Suelo** con colores personalizados:
 
 ```{r}
-ggplot(water, aes(x = Uso_del_Suelo, fill = Uso_del_Suelo)) +
+ggplot(Water, aes(x = Uso_del_Suelo, fill = Uso_del_Suelo)) +
   geom_bar() +
   labs(
     title = "Número de muestras por uso del suelo",
@@ -136,7 +115,7 @@ ggplot(water, aes(x = Uso_del_Suelo, fill = Uso_del_Suelo)) +
 ```
 
 ```{r}
-ggplot(water, aes(x = Uso_del_Suelo, fill = Uso_del_Suelo)) +
+ggplot(Water, aes(x = Uso_del_Suelo, fill = Uso_del_Suelo)) +
   geom_bar() +
   scale_fill_brewer(palette = "Set2") +
   labs(
@@ -150,12 +129,12 @@ ggplot(water, aes(x = Uso_del_Suelo, fill = Uso_del_Suelo)) +
 Con dos variables
 
 ```{r}
-tabla_cont <- table(water$Tipo_de_Zona, water$Estado_Ecológico)
+tabla_cont <- table(Water$Tipo_de_Zona, Water$Estado_Ecológico)
 tabla_cont
 ```
 
 ```{r}
-ggplot(water, aes(x = Tipo_de_Zona, fill = Estado_Ecológico)) +
+ggplot(Water, aes(x = Tipo_de_Zona, fill = Estado_Ecológico)) +
   geom_bar(position = "fill") +
   labs(title = "Proporción de Estado Ecológico por Tipo de Zona",
        x = "Tipo de zona",
@@ -164,7 +143,7 @@ ggplot(water, aes(x = Tipo_de_Zona, fill = Estado_Ecológico)) +
 ```
 
 ```{r}
-ggplot(water, aes(x = Tipo_de_Zona, fill = Estado_Ecológico)) +
+ggplot(Water, aes(x = Tipo_de_Zona, fill = Estado_Ecológico)) +
   geom_bar(position = "dodge") +
   labs(title = "Conteo de Estado Ecológico por Tipo de Zona",
        x = "Tipo de zona",
@@ -173,7 +152,7 @@ ggplot(water, aes(x = Tipo_de_Zona, fill = Estado_Ecológico)) +
 ```
 
 ```{r}
-ggplot(water, aes(x = Tipo_de_Zona, fill = Estado_Ecológico)) +
+ggplot(Water, aes(x = Tipo_de_Zona, fill = Estado_Ecológico)) +
   geom_bar(position = "stack") +
   labs(title = "Conteo de Estado Ecológico por Tipo de Zona",
        x = "Tipo de zona",
@@ -186,7 +165,7 @@ ggplot(water, aes(x = Tipo_de_Zona, fill = Estado_Ecológico)) +
 Proporción de muestras por **Estado_Ecológico**:
 
 ```{r}
-estado_counts <- water %>%
+estado_counts <- Water %>%
   count(Estado_Ecológico) %>%
   mutate(prop = n / sum(n),
          label = paste0(Estado_Ecológico, " (", n, ")"))
@@ -218,13 +197,13 @@ ggplot(estado_counts, aes(x = "", y = prop, fill = Estado_Ecológico)) +
 Distribución de **Dissolved Oxygen (mg/L)** por **Tipo_de_Zona**:
 
 ```{r}
-ggplot(water, aes(x = Tipo_de_Zona, y = `Dissolved Oxygen (mg/L)`)) +
+ggplot(Water, aes(x = Tipo_de_Zona, y = `Dissolved Oxygen (mg/L)`)) +
   geom_boxplot() 
 ```
 
 ```{r}
 
-ggplot(water, aes(x = Tipo_de_Zona, y = `Dissolved Oxygen (mg/L)`, fill = Tipo_de_Zona)) +
+ggplot(Water, aes(x = Tipo_de_Zona, y = `Dissolved Oxygen (mg/L)`, fill = Tipo_de_Zona)) +
   geom_boxplot() +
   scale_fill_brewer(palette = "Pastel1") +
   labs(
@@ -241,12 +220,12 @@ ggplot(water, aes(x = Tipo_de_Zona, y = `Dissolved Oxygen (mg/L)`, fill = Tipo_d
 Relación entre **Turbidez (NTU)** y **Dissolved Oxygen (mg/L)**, coloreado por **Riesgo_Eutrofización**:
 
 ```{r}
-ggplot(water, aes(x = `Turbidity (NTU)`, y = `Dissolved Oxygen (mg/L)`)) +
+ggplot(Water, aes(x = `Turbidity (NTU)`, y = `Dissolved Oxygen (mg/L)`)) +
   geom_point()
 ```
 
 ```{r}
-ggplot(water, aes(x = `Turbidity (NTU)`, y = `Dissolved Oxygen (mg/L)`, color = Riesgo_Eutrofización)) +
+ggplot(Water, aes(x = `Turbidity (NTU)`, y = `Dissolved Oxygen (mg/L)`, color = Riesgo_Eutrofización)) +
   geom_point(alpha = 0.7, size = 2) +
   scale_color_brewer(palette = "Dark2") +
   labs(
@@ -262,7 +241,7 @@ ggplot(water, aes(x = `Turbidity (NTU)`, y = `Dissolved Oxygen (mg/L)`, color = 
 
 ```{r}
 
-ggplot(water, aes(x = `Dissolved Oxygen (mg/L)`)) +
+ggplot(Water, aes(x = `Dissolved Oxygen (mg/L)`)) +
   geom_histogram()
 ```
 
@@ -270,7 +249,7 @@ ggplot(water, aes(x = `Dissolved Oxygen (mg/L)`)) +
 ggplot(Water, aes(x =`Dissolved Oxygen (mg/L)`)) +
       geom_histogram(binwidth = 0.5, fill = "steelblue", 
                      color = "black", alpha = 0.7) +
-      labs(title = paste("Histograma de", var),
-           x = var,
+      labs(title = paste("Histograma de Oxigeno Disuelto"),
+           x = "Oxígeno disuelto (mg/L)" ,
            y = "Frecuencia") 
 ```

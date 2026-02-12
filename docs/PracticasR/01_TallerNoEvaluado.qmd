@@ -1,0 +1,122 @@
+---
+title: "Conceptos básicos"
+author: "NA Cruz"
+format: html
+editor: visual
+embed-resources: true
+---
+
+# PRÁCTICA: Estadística Descriptiva de Calidad del Agua en Mallorca
+
+## Contexto
+
+La calidad del agua es un indicador clave del estado ecológico de los ecosistemas acuáticos en Mallorca.\
+Se han tomado **500 muestras** en distintos tipos de zonas: Serra de Tramuntana, Pla agrícola, zonas urbanas, zonas húmedas y áreas costeras.
+
+Cada muestra tiene mediciones de:
+
+-   pH\
+-   Temperatura (°C)\
+-   Turbidez (NTU)\
+-   Oxígeno disuelto (mg/L)\
+-   Conductividad (µS/cm)
+
+Además, se incluyen variables categóricas creadas para este estudio:
+
+-   Tipo_de_Zona\
+-   Uso_del_Suelo\
+-   Temporada\
+-   Estado_Ecológico\
+-   Riesgo_Eutrofización\
+-   Presión_Antrópica
+
+------------------------------------------------------------------------
+
+## Objetivos
+
+-   Aplicar conceptos de **variables y tipos de datos**\
+-   Calcular **estadísticos descriptivos**: media, mediana, varianza\
+-   Construir **tablas de frecuencias** y gráficas básicas\
+-   Interpretar resultados de manera ecológica y estadística
+
+## Instrucciones
+
+Se recomienda completar la práctica en **50 minutos**.
+
+```{r}
+library(tidyverse)
+Water <- read_csv("https://raw.githubusercontent.com/atobar-uib/MAT_II_BIO_BIOQ_UIB/refs/heads/main/Datasets/WaterQualityTesting.csv")
+head(Water)
+```
+
+## Ejercicios
+
+### 1. Tabla de variables
+
+Construye una tabla que contenga:
+
+| Variable             | Tipo (Cualitativa / Cuantitativa) | Subtipo | Unidad |
+|----------------------|-----------------------------------|---------|--------|
+| pH                   |                                   |         |        |
+| Temperatura          |                                   |         | °C     |
+| Turbidez             |                                   |         | NTU    |
+| Oxígeno disuelto     |                                   |         | mg/L   |
+| Conductividad        |                                   |         | µS/cm  |
+| Tipo_de_Zona         |                                   |         | \-     |
+| Uso_del_Suelo        |                                   |         | \-     |
+| Temporada            |                                   |         | \-     |
+| Estado_Ecológico     |                                   |         | \-     |
+| Riesgo_Eutrofización |                                   |         | \-     |
+| Presión_Antrópica    |                                   |         | \-     |
+
+------------------------------------------------------------------------
+
+### 2. Tabla de frecuencias
+
+-   Construye la **tabla de frecuencias** para la variable `Tipo_de_Zona`.\
+-   Calcula **porcentajes** de cada categoría.
+
+### 3. Media
+
+-   Calcula la **media** de las siguientes variables cuantitativas:
+    -   pH\
+    -   Temperatura\
+    -   Oxígeno disuelto
+
+### 4. Mediana
+
+-   Calcula la **mediana** de las variables:
+    -   Turbidez\
+    -   Conductividad
+
+### 5. Varianza
+
+-   Calcula la **varianza** de:
+    -   pH\
+    -   Temperatura\
+    -   Turbidez
+
+### 6. Gráfico de barras
+
+-   Haz un **diagrama de barras** de la variable `Uso_del_Suelo`.\
+-   Colorea las barras con una paleta distintiva.
+
+### 7. Gráfico de dos variables
+
+-   Haz un **gráfico de dispersión** entre **Turbidez (NTU)** y **Oxígeno disuelto (mg/L)**.\
+-   Colorea los puntos según `Riesgo_Eutrofización`.\
+-   Interpreta la relación observada.
+
+### 8. Boxplot y cuartiles
+
+-   Haz un **boxplot** de `Oxígeno disuelto (mg/L)` por `Tipo_de_Zona`.\
+-   Identifica **cuartiles Q1, Q2 (mediana) y Q3**.\
+-   Señala posibles **valores atípicos**.
+
+## 9. Preguntas de interpretación
+
+1.  ¿Qué tipo de variable es `Tipo_de_Zona`? ¿Qué tipo de variable es `pH`?\
+2.  ¿Qué zona presenta mayor media de oxígeno disuelto?\
+3.  ¿Existe relación entre turbidez y oxígeno disuelto?\
+4.  ¿Qué indica un valor atípico en el boxplot?\
+5.  Según la tabla de frecuencias, ¿qué tipo de zona es más frecuente en la muestra?
